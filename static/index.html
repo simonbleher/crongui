@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>crongui</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#0a0a0a;--s1:#141414;--s2:#1a1a1a;--bd:#262626;--t1:#e5e5e5;--t2:#737373;--ac:#3b82f6;--gn:#22c55e;--rd:#ef4444;--yl:#eab308;--r:10px}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--t1);line-height:1.5}
+    .c{max-width:1100px;margin:0 auto;padding:24px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 32px}
+    header h1{font-size:20px;font-weight:600;letter-spacing:-0.5px;font-family:'SF Mono','Fira Code',monospace}
+    header h1 span{color:var(--ac)}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+    .stat{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:16px}
+    .stat-l{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1px}
+    .stat-v{font-size:28px;font-weight:700;margin-top:4px}
+    .stat-v.gn{color:var(--gn)}.stat-v.rd{color:var(--rd)}
+    .btn{padding:8px 16px;border-radius:8px;border:1px solid var(--bd);background:var(--s1);color:var(--t1);font-size:13px;cursor:pointer;font-weight:500;transition:all .15s}
+    .btn:hover{background:var(--s2);border-color:var(--t2)}
+    .btn-p{background:var(--ac);border-color:var(--ac);color:#fff}.btn-p:hover{background:#2563eb}
+    .btn-s{padding:5px 10px;font-size:12px}
+    .btn-i{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px}
+    .btn-d{color:var(--rd)}.btn-d:hover{background:#1a0a0a;border-color:var(--rd)}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .toolbar h2{font-size:16px;font-weight:600}
+    .jobs{display:flex;flex-direction:column;gap:8px}
+    .job{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);padding:16px 20px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:16px;transition:border-color .15s}
+    .job:hover{border-color:var(--t2)}.job.off{opacity:.5}
+    .job-info h3{font-size:14px;font-weight:600;margin-bottom:4px}
+    .job-meta{display:flex;gap:16px;font-size:12px;color:var(--t2)}
+    .job-meta code{background:var(--bg);padding:2px 6px;border-radius:4px;font-family:'SF Mono','Fira Code',monospace;font-size:11px}
+    .job-actions{display:flex;gap:6px;align-items:center}
+    .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px}
+    .dot.success{background:var(--gn)}.dot.failed,.dot.error,.dot.timeout{background:var(--rd)}
+    .dot.running{background:var(--yl);animation:pulse 1s infinite}.dot.none{background:var(--t2)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .mo{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+    .mo.on{opacity:1;pointer-events:all}
+    .modal{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:520px;max-height:90vh;overflow-y:auto;transform:scale(.95);transition:transform .2s}
+    .mo.on .modal{transform:scale(1)}
+    .mh{padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center}
+    .mh h3{font-size:16px;font-weight:600}
+    .mb{padding:20px 24px}.mf{padding:0 24px 20px;display:flex;justify-content:flex-end;gap:8px}
+    .field{margin-bottom:16px}
+    .field label{display:block;font-size:12px;color:var(--t2);margin-bottom:6px;font-weight:500}
+    .field input,.field textarea{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;color:var(--t1);font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+    .field input:focus,.field textarea:focus{border-color:var(--ac)}
+    .field textarea{resize:vertical;min-height:60px;font-family:'SF Mono','Fira Code',monospace}
+    .presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+    .presets button{padding:3px 8px;font-size:11px;background:var(--bg);border:1px solid var(--bd);border-radius:4px;color:var(--t2);cursor:pointer}
+    .presets button:hover{color:var(--t1);border-color:var(--t2)}
+    .cron-ex{font-size:11px;color:var(--ac);margin-top:4px}
+    .rl{background:var(--s1);border:1px solid var(--bd);border-radius:var(--r);margin-top:24px;overflow:hidden}
+    .rl-h{padding:12px 16px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:600}
+    .re{padding:10px 16px;border-bottom:1px solid var(--bd);font-size:12px;display:grid;grid-template-columns:100px 1fr 80px 70px;gap:12px;align-items:center;cursor:pointer}
+    .re:last-child{border-bottom:none}.re:hover{background:var(--s2)}
+    .re .time{color:var(--t2);font-family:monospace;font-size:11px}
+    .re .name{font-weight:500}.re .dur{color:var(--t2);text-align:right}
+    .badge{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;text-align:center}
+    .badge.success{background:#052e16;color:var(--gn)}.badge.failed,.badge.error{background:#1a0a0a;color:var(--rd)}
+    .badge.timeout{background:#1a1500;color:var(--yl)}.badge.running{background:#1a1500;color:var(--yl)}
+    .outbox{background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:12px;font-family:'SF Mono',monospace;font-size:12px;max-height:300px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;color:var(--t2);line-height:1.6}
+    .empty{text-align:center;padding:60px 20px;color:var(--t2)}
+    .empty h3{font-size:16px;color:var(--t1);margin-bottom:8px}.empty p{font-size:13px;margin-bottom:20px}
+    .tog{width:36px;height:20px;background:var(--bd);border-radius:10px;position:relative;cursor:pointer;transition:background .2s}
+    .tog.on{background:var(--ac)}
+    .tog::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .2s}
+    .tog.on::after{transform:translateX(16px)}
+    @media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}.re{grid-template-columns:80px 1fr 60px}.re .dur{display:none}}
+  </style>
+</head>
+<body>
+<div class="c">
+  <header>
+    <h1>cron<span>gui</span></h1>
+    <div style="font-size:12px;color:var(--t2)" id="clock"></div>
+  </header>
+  <div class="stats" id="stats"></div>
+  <div class="toolbar">
+    <h2>Jobs</h2>
+    <button class="btn btn-p" onclick="openModal()">+ New Job</button>
+  </div>
+  <div class="jobs" id="jobs"></div>
+  <div class="rl" id="rl" style="display:none">
+    <div class="rl-h" id="rl-title">Recent Runs</div>
+    <div id="runs"></div>
+  </div>
+</div>
+
+<div class="mo" id="modal">
+  <div class="modal">
+    <div class="mh"><h3 id="mt">New Job</h3><button class="btn btn-i" onclick="closeModal()">&times;</button></div>
+    <div class="mb">
+      <div class="field"><label>Name</label><input id="fn" placeholder="Backup database"></div>
+      <div class="field"><label>Command</label><textarea id="fc" placeholder="pg_dump mydb > /backups/db.sql"></textarea></div>
+      <div class="field">
+        <label>Schedule (cron expression)</label>
+        <input id="fs" placeholder="0 */6 * * *">
+        <div class="presets">
+          <button onclick="setS('* * * * *')">Every min</button>
+          <button onclick="setS('*/5 * * * *')">5 min</button>
+          <button onclick="setS('*/15 * * * *')">15 min</button>
+          <button onclick="setS('0 * * * *')">Hourly</button>
+          <button onclick="setS('0 */4 * * *')">4 hours</button>
+          <button onclick="setS('0 0 * * *')">Daily</button>
+          <button onclick="setS('0 0 * * 0')">Weekly</button>
+          <button onclick="setS('0 9 * * 1-5')">Weekdays 9am</button>
+        </div>
+        <div class="cron-ex" id="ce"></div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-p" id="ms" onclick="saveJob()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="om">
+  <div class="modal" style="width:700px">
+    <div class="mh"><h3 id="ot">Run Output</h3><button class="btn btn-i" onclick="closeOut()">&times;</button></div>
+    <div class="mb">
+      <div style="margin-bottom:8px;font-size:12px;color:var(--t2)" id="ometa"></div>
+      <div class="outbox" id="ostd"></div>
+      <div id="oerr-w" style="margin-top:12px;display:none">
+        <div style="font-size:12px;color:var(--rd);margin-bottom:4px;font-weight:600">stderr</div>
+        <div class="outbox" id="oerr" style="color:var(--rd)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const A='/api';let eid=null;
+function uc(){document.getElementById('clock').textContent=new Date().toLocaleString()}
+setInterval(uc,1000);uc();
+
+async function api(p,m='GET',b=null){
+  const o={method:m,headers:{'Content-Type':'application/json'}};
+  if(b)o.body=JSON.stringify(b);
+  const r=await fetch(A+p,o);
+  if(!r.ok)throw new Error(await r.text());
+  return r.json();
+}
+
+async function loadStats(){
+  const s=await api('/stats');
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-l">Total Jobs</div><div class="stat-v">${s.total_jobs}</div></div>
+    <div class="stat"><div class="stat-l">Active</div><div class="stat-v gn">${s.enabled_jobs}</div></div>
+    <div class="stat"><div class="stat-l">Passed (24h)</div><div class="stat-v gn">${s.success_24h}</div></div>
+    <div class="stat"><div class="stat-l">Failed (24h)</div><div class="stat-v ${s.failed_24h>0?'rd':''}">${s.failed_24h}</div></div>`;
+}
+
+async function loadJobs(){
+  const jobs=await api('/jobs');
+  const el=document.getElementById('jobs');
+  if(!jobs.length){el.innerHTML=`<div class="empty"><h3>No jobs yet</h3><p>Create your first scheduled job to get started.</p><button class="btn btn-p" onclick="openModal()">+ New Job</button></div>`;return}
+  el.innerHTML=jobs.map(j=>{
+    const l=j.last_run,sc=l?l.status:'none',lt=l?new Date(l.started_at).toLocaleString():'Never',dur=l&&l.duration_ms?(l.duration_ms/1000).toFixed(1)+'s':'';
+    return`<div class="job ${j.enabled?'':'off'}"><div class="job-info"><h3><span class="dot ${sc}"></span>${esc(j.name)}</h3><div class="job-meta"><span><code>${esc(j.schedule)}</code></span><span>${esc(j.command.substring(0,60))}${j.command.length>60?'...':''}</span><span>${lt}${dur?' ('+dur+')':''}</span></div></div><div class="job-actions"><button class="btn btn-s" onclick="runJ('${j.id}')" title="Run now">&#9654;</button><div class="tog ${j.enabled?'on':''}" onclick="togJ('${j.id}',${!j.enabled})" title="${j.enabled?'Disable':'Enable'}"></div><button class="btn btn-s" onclick="editJ('${j.id}')" title="Edit">&#9998;</button><button class="btn btn-s" onclick="showR('${j.id}')" title="History">&#9776;</button><button class="btn btn-s btn-d" onclick="delJ('${j.id}')" title="Delete">&#10005;</button></div></div>`
+  }).join('');
+}
+
+async function loadRuns(){
+  const runs=await api('/runs?limit=20');
+  const el=document.getElementById('runs'),rl=document.getElementById('rl');
+  if(!runs.length){rl.style.display='none';return}
+  rl.style.display='block';document.getElementById('rl-title').textContent='Recent Runs';
+  el.innerHTML=runs.map(r=>`<div class="re" onclick="showOut('${r.job_id}',${r.id})"><span class="time">${new Date(r.started_at).toLocaleString().split(', ').pop()}</span><span class="name">${r.job_id.substring(0,8)} (${r.trigger_type||r.trigger||'schedule'})</span><span class="dur">${r.duration_ms?(r.duration_ms/1000).toFixed(1)+'s':'...'}</span><span class="badge ${r.status}">${r.status}</span></div>`).join('');
+}
+
+async function runJ(id){try{await api(`/jobs/${id}/run`,'POST');await refresh()}catch(e){alert(e.message)}}
+async function togJ(id,en){await api(`/jobs/${id}`,'PATCH',{enabled:en});await refresh()}
+async function delJ(id){if(!confirm('Delete this job?'))return;await api(`/jobs/${id}`,'DELETE');await refresh()}
+async function showR(id){
+  const runs=await api(`/jobs/${id}/runs?limit=20`),job=await api(`/jobs/${id}`);
+  const el=document.getElementById('runs'),rl=document.getElementById('rl');
+  rl.style.display='block';document.getElementById('rl-title').textContent='Runs: '+job.name;
+  el.innerHTML=!runs.length?'<div class="re"><span style="grid-column:1/-1;color:var(--t2)">No runs yet</span></div>':runs.map(r=>`<div class="re" onclick="showOut('${r.job_id}',${r.id})"><span class="time">${new Date(r.started_at).toLocaleString()}</span><span class="name">${r.trigger_type||r.trigger||'schedule'}</span><span class="dur">${r.duration_ms?(r.duration_ms/1000).toFixed(1)+'s':'...'}</span><span class="badge ${r.status}">${r.status}</span></div>`).join('');
+}
+async function showOut(jid,rid){
+  const runs=await api(`/jobs/${jid}/runs?limit=100`),r=runs.find(x=>x.id===rid);if(!r)return;
+  document.getElementById('ot').textContent=`Run #${rid}`;
+  document.getElementById('ometa').textContent=`Status: ${r.status} | Exit: ${r.exit_code} | Duration: ${r.duration_ms?(r.duration_ms/1000).toFixed(1)+'s':'n/a'} | ${new Date(r.started_at).toLocaleString()}`;
+  document.getElementById('ostd').textContent=r.stdout||'(no output)';
+  const ew=document.getElementById('oerr-w');
+  if(r.stderr){document.getElementById('oerr').textContent=r.stderr;ew.style.display='block'}else{ew.style.display='none'}
+  document.getElementById('om').classList.add('on');
+}
+function closeOut(){document.getElementById('om').classList.remove('on')}
+
+function openModal(j=null){
+  eid=j?j.id:null;
+  document.getElementById('mt').textContent=j?'Edit Job':'New Job';
+  document.getElementById('ms').textContent=j?'Save':'Create';
+  document.getElementById('fn').value=j?j.name:'';
+  document.getElementById('fc').value=j?j.command:'';
+  document.getElementById('fs').value=j?j.schedule:'';
+  document.getElementById('modal').classList.add('on');
+  document.getElementById('fn').focus();
+}
+function closeModal(){document.getElementById('modal').classList.remove('on');eid=null}
+async function editJ(id){const j=await api(`/jobs/${id}`);openModal(j)}
+async function saveJob(){
+  const d={name:document.getElementById('fn').value,command:document.getElementById('fc').value,schedule:document.getElementById('fs').value};
+  if(!d.name||!d.command||!d.schedule){alert('Fill all fields');return}
+  try{if(eid)await api(`/jobs/${eid}`,'PATCH',d);else await api('/jobs','POST',d);closeModal();await refresh()}catch(e){alert(e.message)}
+}
+
+function setS(e){document.getElementById('fs').value=e;exCron(e)}
+const cronMap={'* * * * *':'Every minute','*/5 * * * *':'Every 5 minutes','*/15 * * * *':'Every 15 minutes','0 * * * *':'Every hour','0 */4 * * *':'Every 4 hours','0 0 * * *':'Daily at midnight','0 0 * * 0':'Every Sunday','0 9 * * 1-5':'Weekdays at 9:00'};
+function exCron(e){document.getElementById('ce').textContent=cronMap[e]||''}
+document.getElementById('fs').addEventListener('input',e=>exCron(e.target.value));
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+async function refresh(){await Promise.all([loadStats(),loadJobs(),loadRuns()])}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeOut()}if(e.key==='n'&&document.activeElement===document.body)openModal()});
+refresh();setInterval(refresh,10000);
+</script>
+</body>
+</html>
